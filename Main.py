@@ -6,6 +6,7 @@ import readline
 import atexit
 import colorama
 from colorama import Fore, Style
+import re
 
 
 def check_api_key():
@@ -97,6 +98,50 @@ def setup_history():
     atexit.register(readline.write_history_file, histfile)
 
 
+def format_markdown(text):
+    # Format headers
+    text = re.sub(
+        r"^### (.*?) ###$",
+        lambda m: f"\n{Fore.CYAN}{Style.BRIGHT}{m.group(1)}{Style.RESET_ALL}",
+        text,
+        flags=re.MULTILINE,
+    )
+    text = re.sub(
+        r"^## (.*?) ##$",
+        lambda m: f"\n{Fore.CYAN}{Style.BRIGHT}{m.group(1)}{Style.RESET_ALL}",
+        text,
+        flags=re.MULTILINE,
+    )
+    text = re.sub(
+        r"^# (.*?) #$",
+        lambda m: f"\n{Fore.CYAN}{Style.BRIGHT}{m.group(1)}{Style.RESET_ALL}",
+        text,
+        flags=re.MULTILINE,
+    )
+
+    # Format code blocks
+    text = re.sub(
+        r"```[\s\S]*?```", lambda m: f"{Fore.GREEN}{m.group(0)}{Style.RESET_ALL}", text
+    )
+
+    # Format inline code
+    text = re.sub(
+        r"`([^`\n]+)`", lambda m: f"{Fore.GREEN}{m.group(1)}{Style.RESET_ALL}", text
+    )
+
+    # Format bold text
+    text = re.sub(
+        r"\*\*(.*?)\*\*", lambda m: f"{Style.BRIGHT}{m.group(1)}{Style.RESET_ALL}", text
+    )
+
+    # Format italic text
+    text = re.sub(
+        r"\*(.*?)\*", lambda m: f"{Fore.YELLOW}{m.group(1)}{Style.RESET_ALL}", text
+    )
+
+    return text
+
+
 def interactive_mode(client, selected_model):
     setup_history()
     colorama.init()
@@ -113,7 +158,8 @@ def interactive_mode(client, selected_model):
             messages.append({"role": "user", "content": prompt})
             response = generate_completion(client, selected_model, messages)
             if response:
-                print(f"{Fore.YELLOW}{response}{Style.RESET_ALL}")
+                formatted_response = format_markdown(response)
+                print(f"{formatted_response}")
                 messages.append({"role": "assistant", "content": response})
         except KeyboardInterrupt:
             print("\nKeyboard interrupt detected. Type 'exit' or press Ctrl+D to quit.")
@@ -195,10 +241,15 @@ def main():
                 stream=True,
                 response_format=response_format,
             )
+            full_response = ""
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
-                    print(chunk.choices[0].delta.content, end="", flush=True)
-            print()
+                    content = chunk.choices[0].delta.content
+                    full_response += content
+
+            # Format the full response after it's complete
+            formatted_response = format_markdown(full_response)
+            print(f"\n{formatted_response}")
         except Exception as e:
             print(f"Error in Groq API call: {str(e)}")
 
