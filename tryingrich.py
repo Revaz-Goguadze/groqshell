@@ -5,19 +5,25 @@ from groq import Groq
 import readline
 import atexit
 import colorama
-from colorama import Fore, Style
-import re
-import pygments
-from pygments import highlight
-from pygments.lexers import get_lexer_by_name
-from pygments.formatters import TerminalFormatter
+
+# from colorama import Fore, Style
+from rich import print
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.syntax import Syntax
+# import pygments
+# from pygments import highlight
+# from pygments.lexers import get_lexer_by_name
+# from pygments.formatters import TerminalFormatter
 
 
 def check_api_key():
     if "GROQ_API_KEY" not in os.environ:
-        print("Error: GROQ_API_KEY is not set in your environment.")
+        print(
+            "[bold red]Error: GROQ_API_KEY is not set in your environment.[/bold red]"
+        )
         print("Please set your Groq API key using:")
-        print("export GROQ_API_KEY='your-api-key-here'")
+        print("[green]export GROQ_API_KEY='your-api-key-here'[/green]")
         exit(1)
 
 
@@ -37,9 +43,9 @@ def select_groq_model():
                 save_selected_model(selected_model)
                 return selected_model
             else:
-                print("Invalid choice. Please try again.")
+                print("[bold red]Invalid choice. Please try again.[/bold red]")
         except ValueError:
-            print("Invalid input. Please enter a number.")
+            print("[bold red]Invalid input. Please enter a number.[/bold red]")
 
 
 def save_selected_model(model):
@@ -64,9 +70,11 @@ def change_model():
 def get_model_info(client, model_id):
     try:
         model = client.models.retrieve(model_id)
-        print(f"Model '{model.id}' created by {model.owned_by}.")
+        print(
+            f"Model '[bold cyan]{model.id}[/bold cyan]' created by [bold green]{model.owned_by}[/bold green]."
+        )
     except Exception as e:
-        print(f"Error retrieving model info: {str(e)}")
+        print(f"[bold red]Error retrieving model info: {str(e)}[/bold red]")
         return None
 
 
@@ -75,7 +83,7 @@ def list_available_models(client):
         models = client.models.list()
         return models.data
     except Exception as e:
-        print(f"Error listing models: {str(e)}")
+        print(f"[bold red]Error listing models: {str(e)}[/bold red]")
         return []
 
 
@@ -88,7 +96,7 @@ def generate_completion(client, model, messages, max_tokens=100):
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Error generating completion: {str(e)}")
+        print(f"[bold red]Error generating completion: {str(e)}[/bold red]")
         return None
 
 
@@ -103,128 +111,47 @@ def setup_history():
 
 
 def format_markdown(text):
-    # Format headers
-    for i in range(6, 0, -1):
-        text = re.sub(
-            r"^{} (.+)$".format("#" * i),
-            lambda m: f"\n{Fore.CYAN}{Style.BRIGHT}{m.group(1)}{Style.RESET_ALL}",
-            text,
-            flags=re.MULTILINE,
-        )
-
-    # Format code blocks
-    text = re.sub(
-        r"```(\w+)?\n([\s\S]*?)```",
-        lambda m: format_code_block(m.group(2), m.group(1)),
-        text,
-    )
-
-    # Format inline code
-    text = re.sub(
-        r"`([^`\n]+)`", lambda m: f"{Fore.GREEN}{m.group(1)}{Style.RESET_ALL}", text
-    )
-
-    # Format bold text
-    text = re.sub(
-        r"\*\*(.*?)\*\*|__(.*?)__",
-        lambda m: f"{Style.BRIGHT}{m.group(1) or m.group(2)}{Style.RESET_ALL}",
-        text,
-    )
-
-    # Format italic text
-    text = re.sub(
-        r"\*(.*?)\*|_(.*?)_",
-        lambda m: f"{Fore.YELLOW}{m.group(1) or m.group(2)}{Style.RESET_ALL}",
-        text,
-    )
-
-    # Format strikethrough text
-    text = re.sub(
-        r"~~(.*?)~~", lambda m: f"{Style.DIM}{m.group(1)}{Style.RESET_ALL}", text
-    )
-
-    # Format blockquotes
-    text = re.sub(
-        r"^> (.+)$",
-        lambda m: f"{Fore.LIGHTBLACK_EX}{m.group(1)}{Style.RESET_ALL}",
-        text,
-        flags=re.MULTILINE,
-    )
-
-    # Format horizontal rules
-    text = re.sub(
-        r"^([-*_])\1{2,}$",
-        lambda m: f"\n{Fore.WHITE}{'-' * 40}{Style.RESET_ALL}\n",
-        text,
-        flags=re.MULTILINE,
-    )
-
-    # Format unordered lists
-    text = re.sub(
-        r"^([ \t]*)([-*+]) (.+)$",
-        lambda m: f"{m.group(1)}{Fore.YELLOW}•{Style.RESET_ALL} {m.group(3)}",
-        text,
-        flags=re.MULTILINE,
-    )
-
-    # Format ordered lists
-    text = re.sub(
-        r"^([ \t]*)(\d+)\. (.+)$",
-        lambda m: f"{m.group(1)}{Fore.YELLOW}{m.group(2)}.{Style.RESET_ALL} {m.group(3)}",
-        text,
-        flags=re.MULTILINE,
-    )
-
-    # Format links
-    text = re.sub(
-        r"\[([^\]]+)\]\(([^\)]+)\)",
-        lambda m: f"{Fore.BLUE}{m.group(1)}{Style.RESET_ALL} ({Fore.CYAN}{m.group(2)}{Style.RESET_ALL})",
-        text,
-    )
-
-    return text
+    console = Console()
+    md = Markdown(text)
+    console.print(md)
+    return ""  # Return empty string as the formatted text is already printed
 
 
 def format_code_block(code, language=None):
-    if language:
-        try:
-            lexer = get_lexer_by_name(language, stripall=True)
-        except pygments.util.ClassNotFound:
-            lexer = get_lexer_by_name("text", stripall=True)
-    else:
-        lexer = get_lexer_by_name("text", stripall=True)
-
-    formatter = TerminalFormatter()
-    highlighted_code = highlight(code, lexer, formatter)
-    return f"\n{highlighted_code}\n"
+    syntax = Syntax(code, language or "text", theme="monokai", line_numbers=True)
+    console = Console()
+    console.print(syntax)
+    return ""  # Return empty string as the formatted code is already printed
 
 
 def interactive_mode(client, selected_model):
     setup_history()
     colorama.init()
-    print(
-        f"{Fore.GREEN}Entering interactive mode. Type 'exit' or press Ctrl+D to quit.{Style.RESET_ALL}"
+    console = Console()
+    console.print(
+        "[bold green]Entering interactive mode. Type 'exit' or press Ctrl+D to quit.[/bold green]"
     )
     messages = []
     while True:
         try:
-            prompt = input(f"{Fore.BLUE}groqshell> {Style.RESET_ALL}")
+            prompt = console.input("[bold blue]groqshell>[/bold blue] ")
             if prompt.lower() == "exit":
                 print("\nExiting...")
                 break
             messages.append({"role": "user", "content": prompt})
             response = generate_completion(client, selected_model, messages)
             if response:
-                formatted_response = format_markdown(response)
-                print(f"{formatted_response}")
+                format_markdown(response)
                 messages.append({"role": "assistant", "content": response})
         except KeyboardInterrupt:
-            print("\nKeyboard interrupt detected. Type 'exit' or press Ctrl+D to quit.")
+            print(
+                "\n[bold yellow]Keyboard interrupt detected. Type 'exit' or press Ctrl+D to quit.[/bold yellow]"
+            )
         except EOFError:
             print("\nExiting...")
             break
         except Exception as e:
-            print(f"{Fore.RED}Error: {str(e)}{Style.RESET_ALL}")
+            print(f"[bold red]Error: {str(e)}[/bold red]")
 
 
 def main():
@@ -266,7 +193,7 @@ def main():
         models = list_available_models(client)
         print("Available Groq models:")
         for model in models:
-            print(f"- {model.id}")
+            print(f"- [bold cyan]{model.id}[/bold cyan]")
         return
 
     if args.interactive:
@@ -296,10 +223,9 @@ def main():
                     full_response += content
 
             # Format the full response after it's complete
-            formatted_response = format_markdown(full_response)
-            print(f"\n{formatted_response}")
+            format_markdown(full_response)
         except Exception as e:
-            print(f"Error in Groq API call: {str(e)}")
+            print(f"[bold red]Error in Groq API call: {str(e)}[/bold red]")
 
 
 if __name__ == "__main__":
