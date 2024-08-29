@@ -47,59 +47,55 @@ def load_selected_model():
         return None
 
 
-def change_model():
-    print("Changing the model...")
-    return select_groq_model()
-
-
 def main():
     check_api_key()
 
+    # Set up argument parser
     parser = argparse.ArgumentParser(description="Groq AI Shell Interface")
-    parser.add_argument("-p", "--prompt", type=str, help="Prompt for Groq AI")
+    parser.add_argument(
+        "-p", "--prompt", type=str, required=True, help="Prompt for Groq AI"
+    )
     parser.add_argument("-j", "--json", action="store_true", help="Force JSON output")
     parser.add_argument("-m", "--model", action="store_true", help="Select Groq model")
-    parser.add_argument("-c", "--change", action="store_true", help="Change Groq model")
 
+    # Parse arguments
     args = parser.parse_args()
 
-    if not any([args.prompt, args.model, args.change]):
-        parser.error("the following arguments are required: -p/--prompt")
-
+    # Select or load Groq model
     if args.model:
         selected_model = select_groq_model()
-    elif args.change:
-        selected_model = change_model()
     else:
         selected_model = load_selected_model()
 
     if selected_model is None:
         selected_model = select_groq_model()
 
-    if args.prompt:
-        client = Groq()
+    # Initialize Groq client
+    client = Groq()
 
-        try:
-            prompt = args.prompt
-            response_format = None
+    try:
+        # Prepare the prompt and response format
+        prompt = args.prompt
+        response_format = None
 
-            if args.json or "json" in prompt.lower():
-                response_format = {"type": "json_object"}
-                if "json" not in prompt.lower():
-                    prompt += " Please provide the response in JSON format."
+        if args.json or "json" in prompt.lower():
+            response_format = {"type": "json_object"}
+            if "json" not in prompt.lower():
+                prompt += " Please provide the response in JSON format."
 
-            stream = client.chat.completions.create(
-                model=selected_model,
-                messages=[{"role": "user", "content": prompt}],
-                stream=True,
-                response_format=response_format,
-            )
-            for chunk in stream:
-                if chunk.choices[0].delta.content is not None:
-                    print(chunk.choices[0].delta.content, end="", flush=True)
-            print()
-        except Exception as e:
-            print(f"Error in Groq API call: {str(e)}")
+        # Generate response in chunks
+        stream = client.chat.completions.create(
+            model=selected_model,
+            messages=[{"role": "user", "content": prompt}],
+            stream=True,
+            response_format=response_format,
+        )
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                print(chunk.choices[0].delta.content, end="", flush=True)
+        print()  # Print a newline at the end
+    except Exception as e:
+        print(f"Error in Groq API call: {str(e)}")
 
 
 if __name__ == "__main__":

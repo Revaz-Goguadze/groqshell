@@ -5,11 +5,11 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
-        "pocketgroq",
+        "groq",
     ],
     entry_points={
         "console_scripts": [
-            "groqshell=Main:main",
+            "groqshell=groqshell.main:main",
         ],
     },
     author="Coder",
@@ -17,7 +17,7 @@ setup(
     description="A shell interface for Groq AI",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/groqshell",
+    url="https://github.com/johnnycage111/groqshell",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
