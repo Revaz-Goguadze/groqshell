@@ -1,0 +1,4 @@
+groq
+colorama
+rich
+pygments

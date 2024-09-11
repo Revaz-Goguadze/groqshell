@@ -1,27 +1,39 @@
 from setuptools import setup, find_packages
+import codecs
+import os
 
+here = os.path.abspath(os.path.dirname(__file__))
+
+with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
+    long_description = "\n" + fh.read()
+
+VERSION = "0.0.2"
+DESCRIPTION = "Command-line interface for Groq AI models"
+LONG_DESCRIPTION = long_description
+
+# Setting up
 setup(
-    name="groqshell",
-    version="0.1.0",
+    name="groqshell-cli",
+    version=VERSION,
+    author="Johnny Cage",
+    author_email="<johnnycage111@gmail.com>",
+    description=DESCRIPTION,
+    long_description_content_type="text/markdown",
+    long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    install_requires=[
-        "groq",
-    ],
+    install_requires=["groq", "colorama", "rich", "pygments"],
     entry_points={
         "console_scripts": [
-            "groqshell=groqshell.main:main",
+            "groqshell=groqshell.mainrich:main",
         ],
     },
-    author="Coder",
-    author_email="your.email@example.com",
-    description="A shell interface for Groq AI",
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    url="https://github.com/johnnycage111/groqshell",
+    keywords=["python", "groq", "ai", "cli", "shell", "interface"],
     classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Operating System :: Unix",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
     ],
-    python_requires=">=3.6",
 )

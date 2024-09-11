@@ -1,16 +1,22 @@
 Metadata-Version: 2.1
-Name: groqshell
-Version: 0.1.0
-Summary: A shell interface for Groq AI
-Home-page: https://github.com/johnnycage111/groqshell
-Author: Coder
-Author-email: your.email@example.com
+Name: groqshell-cli
+Version: 0.0.2
+Summary: Command-line interface for Groq AI models
+Author: Johnny Cage
+Author-email: <johnnycage111@gmail.com>
+Keywords: python,groq,ai,cli,shell,interface
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
 Classifier: Programming Language :: Python :: 3
-Classifier: License :: OSI Approved :: MIT License
-Classifier: Operating System :: OS Independent
-Requires-Python: >=3.6
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
 Description-Content-Type: text/markdown
 Requires-Dist: groq
+Requires-Dist: colorama
+Requires-Dist: rich
+Requires-Dist: pygments
+
 
 # GroqShell
 
@@ -22,12 +28,17 @@ GroqShell is a command-line interface for interacting with Groq AI models. It al
 - Select from available Groq models
 - Option to force JSON output
 - Persistent model selection
+- Interactive mode for continuous conversation
+- Markdown formatting for responses
+- Syntax highlighting for code blocks
+- Command history support
 
 ## Installation
 
 To install GroqShell, follow these steps:
 
 1. Clone the repository:
+
    ```
    git clone https://github.com/johnnycage111/groqshell.git
    cd groqshell
@@ -68,7 +79,10 @@ groqshell -m
 
 - `-p`, `--prompt`: The prompt to send to the Groq AI model (required)
 - `-j`, `--json`: Force JSON output
-- `-m`, `--model`: Select a Groq model before sending the prompt
+- `-c`, `--change`: Change the Groq model
+- `-i`, `--info`: Get information about the currently selected model
+- `-l`, `--list`: List available Groq models
+- `-I`, `--interactive`: Enter interactive mode for continuous conversation
 
 ## Contributing
 
@@ -76,4 +90,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This
+This project is licensed under the MIT License.

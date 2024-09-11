@@ -1,0 +1,10 @@
+README.md
+setup.py
+groqshell/__init__.py
+groqshell/mainrich.py
+groqshell_cli.egg-info/PKG-INFO
+groqshell_cli.egg-info/SOURCES.txt
+groqshell_cli.egg-info/dependency_links.txt
+groqshell_cli.egg-info/entry_points.txt
+groqshell_cli.egg-info/requires.txt
+groqshell_cli.egg-info/top_level.txt

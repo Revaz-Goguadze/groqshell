@@ -17,15 +17,9 @@ GroqShell is a command-line interface for interacting with Groq AI models. It al
 
 To install GroqShell, follow these steps:
 
-1. Clone the repository:
+1. Install the package:
    ```
-   git clone https://github.com/johnnycage111/groqshell.git
-   cd groqshell
-   ```
-
-2. Install the package:
-   ```
-   pip install .
+   pip install groqshell-cli
    ```
 
 ## Usage
