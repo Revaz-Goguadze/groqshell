@@ -1,4 +1,0 @@
-groq
-colorama
-rich
-pygments
